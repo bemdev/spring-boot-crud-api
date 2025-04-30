@@ -1,0 +1,3 @@
+maven_args: "-P lib -DskipTests"
+tasks:
+  - 'install'
