@@ -1,3 +1,6 @@
+![Release](https://jitpack.io/v/bemdev/spring-boot-crud-api.svg)
+(https://jitpack.io/v/bemdev/spring-boot-crud-api)
+
 # Fast CRUD App on Java Spring Boot
 
 Easy way to create backend service with CRUD routes (aka fastapi)
@@ -7,6 +10,42 @@ Easy way to create backend service with CRUD routes (aka fastapi)
 3. Registration you new CRUD controller on prepare to start App
 
 Collect benifits! You make simple backend with auto documentation (Swagger) at 5 second!
+
+---
+
+## Project dependencies
+
+Parent:
+
+```yml
+<artifactId>spring-boot-starter-parent</artifactId>
+<version>3.4.1</version>
+```
+
+Dependencies:
+
+```yml
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-data-jdbc</artifactId>
+
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-data-jpa</artifactId>
+
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-web</artifactId>
+
+<groupId>org.postgresql</groupId>
+<artifactId>postgresql</artifactId>
+<scope>runtime</scope>
+
+<groupId>org.projectlombok</groupId>
+<artifactId>lombok</artifactId>
+<optional>true</optional>
+
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-test</artifactId>
+<scope>test</scope>
+```
 
 ---
 
@@ -25,86 +64,53 @@ We use JitPack:
 <dependency>
     <groupId>com.github.bemdev</groupId>
     <artifactId>spring-boot-crud-api</artifactId>
-    <version>master-SNAPSHOT</version>
+    <version>v0.0.1-beta.1</version>
 </dependency>
 ```
 
 ## How to use
 
-1. Create entitie
+After generate Spring Boot App at SpringTime or other ways, we can add app name and app version (spring.application.name, spring.application.version) in application.properties.
+
+Finally we can go write api app:
+
+1. For example use default entitie User from library. Add scan entities path.
+   (u can use self-made entitie aka spring-boot entitie class, but important use @Component decorator)
 
 ```java
-package com.mediaforge.crud.entities;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
-
-@Entity
-@Component
-@NoArgsConstructor
-@Table(name = "users")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Users {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @JsonProperty("id")
-  private Long id;
-
-  @Column(nullable = false, unique = true)
-  @JsonProperty("username")
-  private String username;
-
-  @Column(columnDefinition = "TEXT")
-  @JsonProperty("firstname")
-  private String firstname;
-
-  @Column(nullable = false)
-  @JsonProperty("is_active")
-  private Boolean isActive;
-
-  @OneToMany(mappedBy = "owner_id", fetch = FetchType.EAGER, orphanRemoval = true)
-  @JsonProperty("posts")
-  private List<Posts> posts = new ArrayList<>();
-}
+@EntityScan(basePackages = "com.mediaforge.crud.entities")
 ```
 
-2. Create repository
+2. For example use default repository User from library. Add scan repositories path.
+   (u can use self-made repository aka spring-boot repository class)
 
 ```java
-package com.mediaforge.crud.repositories;
-
-import com.mediaforge.crud.entities.Users;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface UsersRepository extends JpaRepository<Users, Long> {
-}
+@EnableJpaRepositories(basePackages = "com.mediaforge.crud.repositories")
 ```
 
 3. Registration new CRUD controller with exclude methods
 
 ```java
-@Bean
-	public CommandLineRunner CommandLineRunnerBean() {
-		registration.registerController("users", new String[] { "deleteAll", "patch" });
-		return (args) -> {
-			System.out.println("Controllers generated. App Started.");
-		};
+public class DemoApplication<T> {
+
+	private final GenericControllerConfig<T, ?> registration;
+
+	 public DemoApplication(GenericControllerConfig<T, ?> registration) {
+	 	this.registration = registration;
+	 }
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
 	}
+
+	 @Bean
+	 public CommandLineRunner CommandLineRunnerBean() {
+		 registration.registerController("users", new String[] { "deleteAll", "patch" });
+		 return (args) -> {
+		 	System.out.println("Controllers generated. App Started.");
+		 };
+	 }
+}
 ```
 
 ---
